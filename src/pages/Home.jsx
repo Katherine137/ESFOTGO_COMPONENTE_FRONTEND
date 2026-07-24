@@ -108,8 +108,8 @@ export const Home = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                         <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
                             <div className="text-4xl mb-3 text-center">🏫</div>
-                            <h3 className="text-xl font-bold text-blue-950 text-center mb-2">Aulas</h3>
-                            <p className="text-gray-600 text-center">Encuentra fácilmente todas las aulas del campus</p>
+                            <h3 className="text-xl font-bold text-blue-950 text-center mb-2">Ubicaciones</h3>
+                            <p className="text-gray-600 text-center">Encuentra fácilmente todas las ubicaciones del campus</p>
                         </div>
 
                         <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">

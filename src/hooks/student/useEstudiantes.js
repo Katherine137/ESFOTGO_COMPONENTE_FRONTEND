@@ -7,7 +7,6 @@ const useEstudiantes = () => {
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
     const [deletingAll, setDeletingAll] = useState(false)
-    const [actualizandoId, setActualizandoId] = useState(null)
     const fileInputRef = useRef(null)
     const { token } = storeAuth()
 
@@ -69,40 +68,13 @@ const useEstudiantes = () => {
         }
     }
 
-    const handleToggleEstado = async (estudiante) => {
-        const nuevoEstado = !(estudiante.activo ?? true)
-        if (!window.confirm(`¿Deseas ${nuevoEstado ? 'ACTIVAR' : 'INACTIVAR'} la cuenta de ${estudiante.nombre} ${estudiante.apellido}?`)) return
-        try {
-            setActualizandoId(estudiante._id)
-            await estudianteService.update(estudiante._id, { activo: nuevoEstado }, token)
-            setEstudiantes(prev => prev.map(e => e._id === estudiante._id ? { ...e, activo: nuevoEstado } : e))
-        } catch (error) {
-            alert(error.response?.data?.msg || 'No se pudo actualizar el estado')
-        } finally {
-            setActualizandoId(null)
-        }
-    }
-
-    const handleCambiarRol = async (estudiante, nuevoRol) => {
-        if (nuevoRol === (estudiante.rol || 'estudiante').toLowerCase()) return
-        try {
-            setActualizandoId(estudiante._id)
-            await estudianteService.update(estudiante._id, { rol: nuevoRol }, token)
-            setEstudiantes(prev => prev.map(e => e._id === estudiante._id ? { ...e, rol: nuevoRol } : e))
-        } catch (error) {
-            alert(error.response?.data?.msg || 'No se pudo actualizar el rol')
-        } finally {
-            setActualizandoId(null)
-        }
-    }
-
     useEffect(() => {
         if (token) fetchEstudiantes()
     }, [token, fetchEstudiantes])
 
     return {
-        estudiantes, loading, uploading, deletingAll, actualizandoId, fileInputRef,
-        handleExcelUpload, handleEliminar, handleEliminarTodo, handleToggleEstado, handleCambiarRol
+        estudiantes, loading, uploading, deletingAll, fileInputRef,
+        handleExcelUpload, handleEliminar, handleEliminarTodo
     }
 }
 

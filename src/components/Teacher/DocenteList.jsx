@@ -1,19 +1,24 @@
+import { useState } from 'react'
 import { MdDeleteForever, MdUploadFile } from 'react-icons/md'
 import useDocentes from '../../hooks/teacher/useDocentes'
 
-const ROLES = [
-    { value: 'estudiante', label: 'Estudiante' },
-    { value: 'docente',    label: 'Docente' },
-    { value: 'administrador', label: 'Administrador' }
-]
-
-const HEADERS = ['N°', 'Nombre', 'Apellido', 'Celular', 'Email', 'Oficina', 'Horarios', 'Información', 'Rol', 'Estado', 'Acciones']
+const HEADERS = ['N°', 'Nombre', 'Apellido', 'Celular', 'Email', 'Oficina', 'Horarios', 'Información', 'Acciones']
 
 const DocenteList = () => {
     const {
         docentes, loading, uploading, deletingAll, actualizandoId, fileInputRef,
-        handleExcelUpload, handleEliminar, handleEliminarTodo, handleToggleEstado, handleCambiarRol
+        handleExcelUpload, handleEliminar, handleEliminarTodo
     } = useDocentes()
+
+    const [busqueda, setBusqueda] = useState('')
+
+    // Filtrar docentes por nombre o apellido
+    const docentesFiltrados = docentes.filter(doc => {
+        const textoBusqueda = busqueda.toLowerCase()
+        const nombre = (doc.nombre || '').toLowerCase()
+        const apellido = (doc.apellido || '').toLowerCase()
+        return nombre.includes(textoBusqueda) || apellido.includes(textoBusqueda)
+    })
 
     if (loading) return (
         <div className="flex items-center justify-center h-screen"><p>Cargando...</p></div>
@@ -44,9 +49,24 @@ const DocenteList = () => {
                 </div>
             </div>
 
+            {/* Barra de Búsqueda */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Buscar por nombre o apellido..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    className="w-full sm:w-80 px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+            </div>
+
             {docentes.length === 0 ? (
                 <div className="p-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
                     No existen registros de docentes
+                </div>
+            ) : docentesFiltrados.length === 0 ? (
+                <div className="p-4 text-sm text-yellow-800 rounded-lg bg-yellow-50" role="alert">
+                    No se encontraron docentes que coincidan con la búsqueda
                 </div>
             ) : (
                 <div className="w-full overflow-x-auto rounded-lg shadow-lg">
@@ -59,16 +79,16 @@ const DocenteList = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {docentes.map((docente, index) => {
-                                const activo   = docente.activo ?? true
-                                const rol      = (docente.rol || 'docente').toLowerCase()
+                            {docentesFiltrados.map((docente, index) => {
                                 const guardando = actualizandoId === docente._id
                                 return (
                                     <tr className="hover:bg-gray-50 text-gray-700" key={docente._id}>
                                         <td className="px-3 py-3 whitespace-nowrap">{index + 1}</td>
                                         <td className="px-3 py-3 whitespace-nowrap">{docente.nombre}</td>
                                         <td className="px-3 py-3 whitespace-nowrap">{docente.apellido}</td>
-                                        <td className="px-3 py-3 whitespace-nowrap">{docente.celular || 'N/A'}</td>
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            {docente.celular || docente.telefono || docente.phone || 'N/A'}
+                                        </td>
                                         <td className="px-3 py-3 whitespace-nowrap">{docente.email}</td>
                                         <td className="px-3 py-3 whitespace-nowrap">{docente.Oficina?.numero || 'N/A'}</td>
                                         <td className="px-3 py-3">
@@ -78,21 +98,6 @@ const DocenteList = () => {
                                         </td>
                                         <td className="px-3 py-3 max-w-40">
                                             <p className="truncate" title={docente.informacion || 'N/A'}>{docente.informacion || 'N/A'}</p>
-                                        </td>
-                                        <td className="px-3 py-3 whitespace-nowrap">
-                                            <select value={rol}
-                                                onChange={(e) => handleCambiarRol(docente, e.target.value)}
-                                                disabled={guardando || deletingAll}
-                                                className="text-xs border border-gray-300 rounded-md px-2 py-1 bg-white focus:outline-none disabled:opacity-50">
-                                                {ROLES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                                            </select>
-                                        </td>
-                                        <td className="px-3 py-3 whitespace-nowrap">
-                                            <button onClick={() => handleToggleEstado(docente)}
-                                                disabled={guardando || deletingAll}
-                                                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 ${activo ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}>
-                                                {guardando ? 'Guardando...' : activo ? 'Activo' : 'Inactivo'}
-                                            </button>
                                         </td>
                                         <td className="px-3 py-3">
                                             <button onClick={() => handleEliminar(docente._id, docente.nombre, docente.apellido)}

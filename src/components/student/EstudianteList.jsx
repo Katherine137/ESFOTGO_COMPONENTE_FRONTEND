@@ -1,19 +1,24 @@
+import { useState } from 'react'
 import { MdDeleteForever, MdUploadFile } from 'react-icons/md'
 import useEstudiantes from '../../hooks/student/useEstudiantes'
 
-const ROLES = [
-    { value: 'estudiante',    label: 'Estudiante' },
-    { value: 'docente',       label: 'Docente' },
-    { value: 'administrador', label: 'Administrador' }
-]
-
-const HEADERS = ['N°', 'Nombre', 'Apellido', 'Celular', 'Email', 'Rol', 'Estado', 'Acciones']
+const HEADERS = ['N°', 'Nombre', 'Apellido', 'Celular', 'Email', 'Acciones']
 
 const EstudianteList = () => {
     const {
         estudiantes, loading, uploading, deletingAll, actualizandoId, fileInputRef,
-        handleExcelUpload, handleEliminar, handleEliminarTodo, handleToggleEstado, handleCambiarRol
+        handleExcelUpload, handleEliminar, handleEliminarTodo
     } = useEstudiantes()
+
+    const [busqueda, setBusqueda] = useState('')
+
+    // Filtrar estudiantes por nombre o apellido
+    const estudiantesFiltrados = estudiantes.filter(est => {
+        const textoBusqueda = busqueda.toLowerCase()
+        const nombre = (est.nombre || '').toLowerCase()
+        const apellido = (est.apellido || '').toLowerCase()
+        return nombre.includes(textoBusqueda) || apellido.includes(textoBusqueda)
+    })
 
     if (loading) return (
         <div className="flex items-center justify-center h-screen"><p>Cargando...</p></div>
@@ -44,9 +49,24 @@ const EstudianteList = () => {
                 </div>
             </div>
 
+            {/* Barra de Búsqueda */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Buscar por nombre o apellido..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    className="w-full sm:w-80 px-4 py-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+            </div>
+
             {estudiantes.length === 0 ? (
                 <div className="p-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
                     <span className="font-medium">No existen registros de estudiantes</span>
+                </div>
+            ) : estudiantesFiltrados.length === 0 ? (
+                <div className="p-4 text-sm text-yellow-800 rounded-lg bg-yellow-50" role="alert">
+                    <span className="font-medium">No se encontraron estudiantes que coincidan con la búsqueda</span>
                 </div>
             ) : (
                 <div className="w-full overflow-x-auto rounded-lg shadow-lg">
@@ -59,32 +79,17 @@ const EstudianteList = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {estudiantes.map((est, index) => {
-                                const activo   = est.activo ?? true
-                                const rol      = (est.rol || 'estudiante').toLowerCase()
+                            {estudiantesFiltrados.map((est, index) => {
                                 const guardando = actualizandoId === est._id
                                 return (
                                     <tr className="hover:bg-gray-50 text-gray-700" key={est._id}>
                                         <td className="px-3 py-3 whitespace-nowrap">{index + 1}</td>
                                         <td className="px-3 py-3 whitespace-nowrap">{est.nombre}</td>
                                         <td className="px-3 py-3 whitespace-nowrap">{est.apellido}</td>
-                                        <td className="px-3 py-3 whitespace-nowrap">{est.celular || 'N/A'}</td>
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            {est.celular || est.telefono || est.phone || 'N/A'}
+                                        </td>
                                         <td className="px-3 py-3 whitespace-nowrap">{est.email}</td>
-                                        <td className="px-3 py-3 whitespace-nowrap">
-                                            <select value={rol}
-                                                onChange={(e) => handleCambiarRol(est, e.target.value)}
-                                                disabled={guardando || deletingAll}
-                                                className="text-xs border border-gray-300 rounded-md px-2 py-1 bg-white focus:outline-none disabled:opacity-50">
-                                                {ROLES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                                            </select>
-                                        </td>
-                                        <td className="px-3 py-3 whitespace-nowrap">
-                                            <button onClick={() => handleToggleEstado(est)}
-                                                disabled={guardando || deletingAll}
-                                                className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 ${activo ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}>
-                                                {guardando ? 'Guardando...' : activo ? 'Activo' : 'Inactivo'}
-                                            </button>
-                                        </td>
                                         <td className="px-3 py-3">
                                             <button onClick={() => handleEliminar(est._id, est.nombre, est.apellido)}
                                                 disabled={deletingAll || guardando}

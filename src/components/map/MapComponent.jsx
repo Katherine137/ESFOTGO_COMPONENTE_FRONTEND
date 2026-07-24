@@ -7,7 +7,6 @@ import L from 'leaflet';
 import axios from 'axios';
 import storeAuth from '../../context/storeAuth';
 
-/* ─── Leaflet icon fix ─────────────────────────────────────────── */
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -15,7 +14,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-/* ─── Category config ───────────────────────────────────────────── */
 const CATEGORY_CONFIG = {
     academico:       { color: '#1B6BB0', label: 'Académico',       tw: 'bg-blue-100 text-blue-700'   },
     biblioteca:      { color: '#7C3AED', label: 'Biblioteca',       tw: 'bg-purple-100 text-purple-700' },
@@ -27,7 +25,6 @@ const CATEGORY_CONFIG = {
     otro:            { color: '#9CA3AF', label: 'Otro',             tw: 'bg-gray-100 text-gray-500'   },
 };
 
-/* ─── Custom icons ──────────────────────────────────────────────── */
 const userLocationIcon = L.divIcon({
     className: '',
     html: `
@@ -61,7 +58,6 @@ function createPoiIcon(category) {
     });
 }
 
-/* ─── Map helpers ────────────────────────────────────────────────── */
 function MapUpdater({ center, zoom }) {
     const map = useMap();
     useEffect(() => { if (center) map.flyTo(center, zoom, { duration: 1.2 }); }, [center, zoom, map]);
@@ -141,7 +137,6 @@ async function reverseGeocode(lat, lng) {
     return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 }
 
-/* ─── ETA Banner ─────────────────────────────────────────────────── */
 function ETABanner({ routeInfo, onClose, destination, destName }) {
     if (!routeInfo) return null;
     const h = Math.floor(routeInfo.durationMin / 60);
@@ -165,7 +160,6 @@ function ETABanner({ routeInfo, onClose, destination, destName }) {
     );
 }
 
-/* ─── Search box ─────────────────────────────────────────────────── */
 function AddressSearchBox({ onSelect, disabled }) {
     const [query, setQuery]     = useState('');
     const [results, setResults] = useState([]);
@@ -215,7 +209,6 @@ function AddressSearchBox({ onSelect, disabled }) {
     );
 }
 
-/* ─── Collapsible section ────────────────────────────────────────── */
 function Section({ title, icon, open, onToggle, children, accent = 'blue' }) {
     const accents = {
         blue:   'text-blue-700 bg-blue-50 border-blue-100',
@@ -236,7 +229,6 @@ function Section({ title, icon, open, onToggle, children, accent = 'blue' }) {
     );
 }
 
-/* ─── 360 Viewer ──────────────────────────────────────────────────── */
 function Viewer360({ imageUrl, onClose }) {
     const containerRef = useRef(null);
     const viewerRef = useRef(null);
@@ -324,7 +316,6 @@ function Viewer360({ imageUrl, onClose }) {
     );
 }
 
-/* ─── Main component ─────────────────────────────────────────────── */
 const MapComponent = () => {
     const { token } = storeAuth();
 
@@ -347,7 +338,6 @@ const MapComponent = () => {
         return instance;
     }, [BASE_URL, token]);
 
-    /* ── DB state ── */
     const [dbPois,    setDbPois]    = useState([]);
     const [dbRoutes,  setDbRoutes]  = useState([]);
     const [loadingDB, setLoadingDB] = useState(false);
@@ -398,7 +388,6 @@ const MapComponent = () => {
 
     useEffect(() => { fetchDB(); }, [fetchDB]);
 
-    /* ── Map state ── */
     const [selectedDbRoute,      setSelectedDbRoute]      = useState(null);
     const [selectedPoint,        setSelectedPoint]        = useState(null);
     const [mapCenter,            setMapCenter]            = useState([-0.26, -78.52]);
@@ -423,7 +412,6 @@ const MapComponent = () => {
         return () => window.removeEventListener('resize', h);
     }, []);
 
-    /* ── Geolocation ── */
     const startTracking = () => {
         if (!navigator.geolocation) { setLocationError('Tu navegador no soporta geolocalización.'); return; }
         setLocating(true); setLocationError(null);
@@ -442,7 +430,6 @@ const MapComponent = () => {
     };
     useEffect(() => () => { if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current); }, []);
 
-    /* ── Handlers ── */
     const handleSelectDbRoute = (r) => {
         setSelectedPoint(null); setSelectedDbRoute(r);
         if (r._stops?.length) setMapCenter([r._stops[0].lat, r._stops[0].lng]);
@@ -470,7 +457,6 @@ const MapComponent = () => {
     const [routeVisible, setRouteVisible] = useState(true);
     const activeDbRoute = selectedDbRoute && !destination ? selectedDbRoute : null;
 
-    /* ─────────────────── SIDEBAR CONTENT ─────────────────── */
     const sidebarContent = (
         <div className="flex flex-col gap-3 p-3">
 
@@ -596,7 +582,6 @@ const MapComponent = () => {
                 </div>
             </Section>
 
-            {/* ── POIs DB ── */}
             <Section title={`Ubicaciones ${dbPois.length ? `(${dbPois.length})` : ''}`} icon="📌" open={secOpen.pois} onToggle={() => tog('pois')} accent="green">
                 <div className="p-2 max-h-80 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
                     {loadingDB && <div className="text-center py-4 text-sm text-gray-400 animate-pulse">Cargando ubicaciones…</div>}
@@ -634,7 +619,6 @@ const MapComponent = () => {
         </div>
     );
 
-    /* ─────────────────── MAP CONTENT ─────────────────── */
     const mapContent = (
         <div className="relative w-full h-full">
             <ETABanner routeInfo={routeInfo} destination={destination} destName={destName} onClose={clearDestination} />
@@ -748,7 +732,6 @@ const MapComponent = () => {
         </div>
     );
 
-    /* ─────────────────── LAYOUT ─────────────────── */
     return (
         <div className="flex flex-col md:flex-row w-full font-sans" style={{ height: 'calc(100vh - 64px)' }}>
             {viewer360Url && <Viewer360 imageUrl={viewer360Url} onClose={() => setViewer360Url(null)} />}
@@ -768,11 +751,9 @@ const MapComponent = () => {
                 </div>
             </aside>
 
-            {/* ── Map area ── */}
             <div className="flex-1 relative overflow-hidden" style={{ minHeight: isMobile ? '60vh' : undefined }}>
                 {mapContent}
 
-                {/* Mobile slide-up drawer */}
                 {isMobile && sidebarOpen && (
                     <>
                         <div onClick={() => setSidebarOpen(false)}

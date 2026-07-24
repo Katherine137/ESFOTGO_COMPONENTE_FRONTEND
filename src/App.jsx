@@ -13,7 +13,6 @@ import Dashboard from './layout/Dashboard'
 import Profile from './pages/Profile'
 import Event from './pages/Event'
 import Chat from './pages/Chat'
-import Classroom from './pages/Classroom'
 import Tutoring from './pages/Tutoring'
 import Tutoria from './pages/Tutoria'
 import List from './pages/List'
@@ -26,7 +25,7 @@ import EventoList from './components/event/EventoList'
 import EventoCardUpdate from './components/event/EventoCardUpdate'
 import TutoriaList from './components/Tutoring/TutoriaList'
 import TutoriaCardUpdate from './components/Tutoring/TutoriaCardUpdate'
-import AulaList from './components/classroom/AulaList'
+import UbicacionesList from './components/ubicacion/UbicacionesList'
 import DocenteList from './components/Teacher/DocenteList'
 import EstudianteList from './components/student/EstudianteList'
 import RutasList from './components/ruta/RutaList'
@@ -65,14 +64,13 @@ function App() {
           <Route index element={<DashboardHome/>}/>
           <Route path='profile' element={<Profile/>}/>
           <Route path='event' element={<Event/>}/>
-          <Route path='classroom' element={<Classroom/>}/>
           <Route path='tutoring' element={<Tutoring/>}/>
           <Route path='tutoria' element={<Tutoria/>}/>
           <Route path='actualizarevento/:id' element={<EventoCardUpdate />}/>
           <Route path='actualizartutoria/:id' element={<TutoriaCardUpdate />}/>
           <Route path='mapcreate' element={<MapCreate/>}/>
           <Route path='list' element={<List/>}/>
-          <Route path='list/aulas' element={<AulaList/>}/>
+          <Route path='list/ubicaciones' element={<UbicacionesList/>}/>
           <Route path='list/eventos' element={<EventoList />}/>
           <Route path='list/docentes' element={<DocenteList/>}/>
           <Route path='list/estudiantes' element={<EstudianteList/>}/>

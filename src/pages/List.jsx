@@ -74,13 +74,13 @@ const List = () => {
                 )}
                 {(rol === 'admin') && (
                     <Link 
-                        to="/dashboard/list/aulas"
+                        to="/dashboard/list/ubicaciones"
                         className="bg-white border-2 border-purple-500 p-6 rounded-lg shadow-lg hover:bg-blue-50 hover:scale-105 transition-all"
                     >
                         <div className="text-center">
                             <div className="text-5xl mb-4">🏫</div>
-                            <h2 className="text-xl font-bold text-purple-900">Aulas</h2>
-                            <p className="text-gray-600 mt-2">Ver listado de aulas</p>
+                            <h2 className="text-xl font-bold text-purple-900">Ubicaciones</h2>
+                            <p className="text-gray-600 mt-2">Ver listado de ubicaciones</p>
                         </div>
                     </Link>
                 )}

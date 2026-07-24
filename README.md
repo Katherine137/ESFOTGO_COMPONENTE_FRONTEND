@@ -123,7 +123,6 @@ El proyecto sigue una **arquitectura limpia por capas**:
 │   │   └── 🖼️ react.svg
 │   ├── 📁 components
 │   │   ├── 📁 Teacher
-│   │   │   ├── 📄 DocenteCard.jsx
 │   │   │   └── 📄 DocenteList.jsx
 │   │   ├── 📁 Tutoring
 │   │   │   ├── 📄 TutoriaCard.jsx
@@ -132,10 +131,7 @@ El proyecto sigue una **arquitectura limpia por capas**:
 │   │   │   ├── 📄 TutoriaHorario.jsx
 │   │   │   ├── 📄 TutoriaList.jsx
 │   │   │   └── 📄 TutoriaStatusBadge.jsx
-│   │   ├── 📁 classroom
-│   │   │   ├── 📄 AulaCard.jsx
-│   │   │   ├── 📄 AulaCardUpdate.jsx
-│   │   │   ├── 📄 AulaForm.jsx
+│   │   ├── 📁 ubicacion
 │   │   │   └── 📄 AulaList.jsx
 │   │   ├── 📁 event
 │   │   │   ├── 📄 EventoCard.jsx
@@ -164,9 +160,9 @@ El proyecto sigue una **arquitectura limpia por capas**:
 │   │   │   ├── 📄 useLogin.js
 │   │   │   ├── 📄 useRegister.js
 │   │   │   └── 📄 useReset.js
-│   │   ├── 📁 classroom
+│   │   ├── 📁 ubicacion
 │   │   │   ├── 📄 useAulaForm.js
-│   │   │   └── 📄 useAulas.js
+│   │   │   └── 📄 useUbicaciones.js
 │   │   ├── 📁 events
 │   │   │   ├── 📄 useEventoForm.js
 │   │   │   ├── 📄 useEventoUpdate.js
@@ -191,7 +187,6 @@ El proyecto sigue una **arquitectura limpia por capas**:
 │   │   └── 📄 Dashboard.jsx
 │   ├── 📁 pages
 │   │   ├── 📄 Chat.jsx
-│   │   ├── 📄 Classroom.jsx
 │   │   ├── 📄 DashboardHome.jsx
 │   │   ├── 📄 Event.jsx
 │   │   ├── 📄 ExcelUpload.jsx

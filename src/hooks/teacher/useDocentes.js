@@ -69,40 +69,13 @@ const useDocentes = () => {
         }
     }
 
-    const handleToggleEstado = async (docente) => {
-        const nuevoEstado = !(docente.activo ?? true)
-        if (!window.confirm(`¿Deseas ${nuevoEstado ? 'ACTIVAR' : 'INACTIVAR'} la cuenta de ${docente.nombre} ${docente.apellido}?`)) return
-        try {
-            setActualizandoId(docente._id)
-            await docenteService.update(docente._id, { activo: nuevoEstado }, token)
-            setDocentes(prev => prev.map(d => d._id === docente._id ? { ...d, activo: nuevoEstado } : d))
-        } catch (error) {
-            alert(error.response?.data?.msg || 'No se pudo actualizar el estado')
-        } finally {
-            setActualizandoId(null)
-        }
-    }
-
-    const handleCambiarRol = async (docente, nuevoRol) => {
-        if (nuevoRol === (docente.rol || 'docente').toLowerCase()) return
-        try {
-            setActualizandoId(docente._id)
-            await docenteService.update(docente._id, { rol: nuevoRol }, token)
-            setDocentes(prev => prev.map(d => d._id === docente._id ? { ...d, rol: nuevoRol } : d))
-        } catch (error) {
-            alert(error.response?.data?.msg || 'No se pudo actualizar el rol')
-        } finally {
-            setActualizandoId(null)
-        }
-    }
-
     useEffect(() => {
         if (token) fetchDocentes()
     }, [token, fetchDocentes])
 
     return {
         docentes, loading, uploading, deletingAll, actualizandoId, fileInputRef,
-        handleExcelUpload, handleEliminar, handleEliminarTodo, handleToggleEstado, handleCambiarRol
+        handleExcelUpload, handleEliminar, handleEliminarTodo
     }
 }
 
