@@ -132,7 +132,7 @@ El proyecto sigue una **arquitectura limpia por capas**:
 │   │   │   ├── 📄 TutoriaList.jsx
 │   │   │   └── 📄 TutoriaStatusBadge.jsx
 │   │   ├── 📁 ubicacion
-│   │   │   └── 📄 AulaList.jsx
+│   │   │   └── 📄 UbicacionesList.jsx
 │   │   ├── 📁 event
 │   │   │   ├── 📄 EventoCard.jsx
 │   │   │   ├── 📄 EventoCardUpdate.jsx
@@ -161,7 +161,6 @@ El proyecto sigue una **arquitectura limpia por capas**:
 │   │   │   ├── 📄 useRegister.js
 │   │   │   └── 📄 useReset.js
 │   │   ├── 📁 ubicacion
-│   │   │   ├── 📄 useAulaForm.js
 │   │   │   └── 📄 useUbicaciones.js
 │   │   ├── 📁 events
 │   │   │   ├── 📄 useEventoForm.js
