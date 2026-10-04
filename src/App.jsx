@@ -53,9 +53,10 @@ function App() {
           <Route path='register' element={<Register/>}/>
           <Route path='forgot/:id' element={<Forgot/>}/>
           <Route path='recuperarpassword/:token' element={<Reset/>}/>
-          <Route path='map' element={<Map/>}/>
         </Route>
-
+        
+        <Route path='map' element={<Map/>}/>
+        
         <Route path='/dashboard' element={
           <ProtectedRoute>
             <Dashboard/>

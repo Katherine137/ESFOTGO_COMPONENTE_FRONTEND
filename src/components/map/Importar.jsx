@@ -807,7 +807,8 @@ const AdvancedMapComponent = () => {
                     center={mapCenter} zoom={mapZoom}
                     style={{ height: '100%', width: '100%' }}
                 >
-                    <MapUpdater center={mapCenter} zoom={mapZoom} />
+                    <MapUpdater center={mapCenter} zoom={userLocation ? 15 : 12} />
+                    <FitBounds points={allPoints} />
                     <TileLayer
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

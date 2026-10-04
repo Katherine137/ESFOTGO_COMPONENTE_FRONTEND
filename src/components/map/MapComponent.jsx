@@ -60,7 +60,30 @@ function createPoiIcon(category) {
 
 function MapUpdater({ center, zoom }) {
     const map = useMap();
-    useEffect(() => { if (center) map.flyTo(center, zoom, { duration: 1.2 }); }, [center, zoom, map]);
+    const prev = useRef(null);
+    useEffect(() => {
+        if (!center) return;
+        const key = `${center[0]},${center[1]},${zoom}`;
+        if (prev.current === null) { prev.current = key; return; }
+        if (prev.current === key) return;
+        prev.current = key;
+        map.flyTo(center, zoom, { duration: 1.2 });
+    }, [center, zoom, map]);
+    return null;
+}
+
+function FitBounds({ points }) {
+    const map = useMap();
+    const doneRef = useRef(false);
+
+    useEffect(() => {
+        if (doneRef.current || !points || points.length === 0) return;
+        const valid = points.filter(p => p[0] && p[1]);
+        if (valid.length === 0) return;
+        map.fitBounds(L.latLngBounds(valid), { padding: [20, 20], maxZoom: 20, animate: false });
+        doneRef.current = true;
+    }, [points, map]);
+
     return null;
 }
 
@@ -457,6 +480,13 @@ const MapComponent = () => {
     const [routeVisible, setRouteVisible] = useState(true);
     const activeDbRoute = selectedDbRoute && !destination ? selectedDbRoute : null;
 
+    const allPoints = useMemo(
+        () => dbPois
+            .filter(p => p.latitud && p.longitud)
+            .map(p => [p.latitud, p.longitud]),
+        [dbPois]
+    );
+
     const sidebarContent = (
         <div className="flex flex-col gap-3 p-3">
 
@@ -639,10 +669,10 @@ const MapComponent = () => {
             <MapContainer center={mapCenter} zoom={12} maxZoom={22} style={{ height: '100%', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; OpenStreetMap' maxZoom={22} maxNativeZoom={19} />
-                <MapUpdater center={mapCenter} zoom={userLocation ? 15 : 12} />
+                <MapUpdater center={mapCenter} zoom={userLocation ? 15 : 17} />
+                <FitBounds points={allPoints} />
                 <MapClickHandler onMapClick={handleMapClick} isSettingDestination={isSettingDestination} />
-
-                {/* User location */}
+                {/* User location */}   
                 {userLocation && (
                     <Marker position={userLocation} icon={userLocationIcon}>
                         <Popup>
