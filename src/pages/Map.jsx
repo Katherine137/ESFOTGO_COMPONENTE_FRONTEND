@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
+import { Map as MapIcon } from 'lucide-react';
 import MapComponent from '../components/map/MapComponent';
 
 export const Map = () => {
 return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
     <header style={{
-        backgroundColor: '#007bff',
+        backgroundColor: '#234094',
         color: 'white',
         padding: '10px 15px',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
@@ -19,9 +20,16 @@ return (
             alignItems: 'center',
             gap: '8px'
         }}>
-            <h1 style={{ margin: 0, fontSize: 'clamp(16px, 4vw, 24px)' }}>
-            🚍 EsfotGo - Mapa de Rutas Polibus
+            <MapIcon
+                size={30}
+                color="white"
+                strokeWidth={2}
+                style={{ flexShrink: 0 }}
+            />
+            <h1 style={{ margin: 0, fontSize: 'clamp(12px, 2vw, 20px)', lineHeight: 1.5, fontWeight: 600}}>
+            ¡Explora cada espacio en una experiencia inmersiva! Haz clic en los recuadros del mapa para descubrir las imágenes panorámicas en 360°.
             </h1>
+            {/*
             <nav style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
             <Link 
             to="/" 
@@ -48,6 +56,7 @@ return (
                 Login
             </Link>
             </nav>
+            */}
         </div>
     </header>
 

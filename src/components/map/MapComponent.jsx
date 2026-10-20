@@ -15,15 +15,69 @@ L.Icon.Default.mergeOptions({
 });
 
 const CATEGORY_CONFIG = {
-    academico:       { color: '#1B6BB0', label: 'Académico',       tw: 'bg-blue-100 text-blue-700'   },
-    biblioteca:      { color: '#7C3AED', label: 'Biblioteca',       tw: 'bg-purple-100 text-purple-700' },
-    servicios:       { color: '#059669', label: 'Servicios',        tw: 'bg-emerald-100 text-emerald-700' },
-    deportes:        { color: '#DC2626', label: 'Deportes',         tw: 'bg-red-100 text-red-700'     },
-    eventos:         { color: '#F59E0B', label: 'Eventos',          tw: 'bg-amber-100 text-amber-700' },
-    estacionamiento: { color: '#6B7280', label: 'Estacionamiento',  tw: 'bg-gray-100 text-gray-600'   },
-    entrada:         { color: '#0EA5E9', label: 'Entrada',          tw: 'bg-sky-100 text-sky-700'     },
-    otro:            { color: '#9CA3AF', label: 'Otro',             tw: 'bg-gray-100 text-gray-500'   },
+    academico:       { color: '#1E5AA8', dark: '#FFFFFF', shape: 'hexagon', label: 'Académico',       tw: 'bg-[#1E5AA8]/15 text-[#1E5AA8]' },
+    biblioteca:      { color: '#1AA7DD', dark: '#FFFFFF', shape: 'hexagon', label: 'Biblioteca',      tw: 'bg-[#1AA7DD]/15 text-[#0B7BA8]' },
+    servicios:       { color: '#22A06B', dark: '#FFFFFF', shape: 'circle',  label: 'Servicios',       tw: 'bg-[#22A06B]/15 text-[#157A50]' },
+    deportes:        { color: '#E0402A', dark: '#FFFFFF', shape: 'circle',  label: 'Deportes',        tw: 'bg-[#E0402A]/15 text-[#B52E1C]' },
+    eventos:         { color: '#D946B8', dark: '#FFFFFF', shape: 'circle',  label: 'Eventos',         tw: 'bg-[#D946B8]/15 text-[#A52F8B]' },
+    estacionamiento: { color: '#8E96A3', dark: '#FFFFFF', shape: 'diamond', label: 'Estacionamiento', tw: 'bg-[#8E96A3]/20 text-[#5B6470]' },
+    entrada:         { color: '#7C3AED', dark: '#FFFFFF', shape: 'diamond', label: 'Entrada',         tw: 'bg-[#7C3AED]/15 text-[#5B21B6]' },
+    otro:            { color: '#F97316', dark: '#FFFFFF', shape: 'square', label: 'Otro', tw: 'bg-[#F97316]/15 text-[#C2410C]' },
 };
+const MARKER_SIZE          = 40;  // tamaño normal en el mapa
+const MARKER_SIZE_SELECTED = 50;  // tamaño del marcador seleccionado
+const BADGE_SIZE_LIST      = 34;  // cuadrito en la lista "Ubicaciones"
+const BADGE_SIZE_DEST      = 30;  // cuadrito en la lista "Destino"
+
+// Íconos Material Design (viewBox 24x24)
+const ICON_PATHS = {
+    academico:       'M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z',
+    biblioteca:      'M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z',
+    servicios:       'M2 17h20v2H2zm11.84-9.21c.1-.24.16-.51.16-.79 0-1.1-.9-2-2-2s-2 .9-2 2c0 .28.06.55.16.79C6.25 8.6 3.27 11.93 3 16h18c-.27-4.07-3.25-7.4-7.16-8.21z',
+    deportes:        'M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z',
+    eventos:         'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',
+    estacionamiento: 'M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z',
+    entrada:         'M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z',
+    otro:            'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
+};
+
+const SHAPES = {
+    circle:  { vb: [32, 32], cy: 16, s: 0.6,
+        draw: (f) => `<circle cx="16" cy="16" r="14" fill="${f}" stroke="#fff" stroke-width="2"/>` },
+    hexagon: { vb: [32, 32], cy: 16, s: 0.6,
+        draw: (f) => `<polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="${f}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>` },
+    diamond: { vb: [32, 32], cy: 16, s: 0.5,
+        draw: (f) => `<polygon points="16,1.5 30.5,16 16,30.5 1.5,16" fill="${f}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>` },
+    square:  { vb: [32, 32], cy: 16, s: 0.6,
+        draw: (f) => `<rect x="3" y="3" width="26" height="26" rx="7" fill="${f}" stroke="#fff" stroke-width="2"/>` },
+};
+
+function markerSvg(category, width) {
+    const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.otro;
+    const sh = SHAPES[cfg.shape] || SHAPES.circle;
+    const [vw, vh] = sh.vb;
+    const height = Math.round((width * vh) / vw);
+    const path = ICON_PATHS[category] || ICON_PATHS.otro;
+    const half = 12 * sh.s; // mitad del ícono ya escalado
+    const html = `<svg width="${width}" height="${height}" viewBox="0 0 ${vw} ${vh}" xmlns="http://www.w3.org/2000/svg">
+        ${sh.draw(cfg.color)}
+        <g transform="translate(${16 - half},${sh.cy - half}) scale(${sh.s})" fill="${cfg.dark}"><path d="${path}"/></g>
+    </svg>`;
+    return { html, height };
+}
+
+// Para las listas del panel
+const ShapeBadge = ({ category, size = 28 }) => (
+    <span className="shrink-0 inline-flex" style={{ width: size }}
+        dangerouslySetInnerHTML={{ __html: markerSvg(category, size).html }} />
+);
+
+// Componente para las listas del panel
+const CatIcon = ({ category, size = 14, color }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+        <path d={ICON_PATHS[category] || ICON_PATHS.otro} />
+    </svg>
+);
 
 const userLocationIcon = L.divIcon({
     className: '',
@@ -49,13 +103,58 @@ const destinationIcon = L.divIcon({
     iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -42],
 });
 
-function createPoiIcon(category) {
+const FOCUS_ZOOM = 20;
+
+const hasValidCoords = (p) => {
+    const lat = Number(p?.latitud), lng = Number(p?.longitud);
+    return Number.isFinite(lat) && Number.isFinite(lng)
+        && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
+        && !(lat === 0 && lng === 0);
+};
+
+const poiIconCache = {};
+function createPoiIcon(category, selected = false) {
+    const key = `${category}-${selected}`;
+    if (poiIconCache[key]) return poiIconCache[key];
     const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.otro;
-    return L.divIcon({
+    const width = selected ? MARKER_SIZE_SELECTED : MARKER_SIZE;
+    const { html: svg, height } = markerSvg(category, width);
+
+    const wrapStyle = selected
+        ? `filter:drop-shadow(0 0 6px ${cfg.color}) drop-shadow(0 3px 6px rgba(0,0,0,.45));animation:poi-pulse 1.4s ease-in-out infinite;`
+        : 'filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));';
+    const html = `<div style="${wrapStyle}">${svg}</div>
+        ${selected ? '<style>@keyframes poi-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}</style>' : ''}`;
+
+    return (poiIconCache[key] = L.divIcon({
         className: '',
-        html: `<div style="background:${cfg.color};color:#fff;padding:4px 8px;border-radius:7px;border:2px solid #fff;font-weight:800;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.3);white-space:nowrap;">${cfg.label.charAt(0)}</div>`,
-        iconSize: [26, 26], iconAnchor: [13, 13],
-    });
+        html,
+        iconSize: [width, height],
+        iconAnchor: [width / 2, height / 2],
+        popupAnchor: [0, -height / 2],
+    }));
+}
+
+function FlyToController({ target, markerRefs }) {
+    const map = useMap();
+    useEffect(() => {
+        if (!target) return;
+        let cancelled = false;
+        const openPopup = () => {
+            if (!cancelled) markerRefs.current[target.id]?.openPopup();
+        };
+        map.whenReady(() => {
+            if (cancelled) return;
+            const zoom = Math.min(FOCUS_ZOOM, map.getMaxZoom());
+            const yaThere = map.getCenter().distanceTo(target.coords) < 1 && map.getZoom() === zoom;
+            map.closePopup();
+            if (yaThere) { openPopup(); return; }
+            map.once('moveend', openPopup);
+            map.flyTo(target.coords, zoom, { duration: 1.4, easeLinearity: 0.25 });
+        });
+        return () => { cancelled = true; map.off('moveend', openPopup); };
+    }, [target, map, markerRefs]);
+    return null;
 }
 
 function MapUpdater({ center, zoom }) {
@@ -380,8 +479,8 @@ const MapComponent = () => {
                     nombre:      d.nombre || d.name || '',
                     descripcion: d.descripcion || d.description || '',
                     categoria:   d.categoria || d.category || 'otro',
-                    latitud:     d.latitud ?? d.latitude ?? 0,
-                    longitud:    d.longitud ?? d.longitude ?? 0,
+                    latitud:     Number(d.latitud ?? d.latitude ?? 0),
+                    longitud:    Number(d.longitud ?? d.longitude ?? 0),
                     imagen:      d.imagen || null,
                 })));
             }
@@ -423,6 +522,8 @@ const MapComponent = () => {
     const [locating,             setLocating]             = useState(false);
     const [viewer360Url,         setViewer360Url]         = useState(null);
     const watchIdRef = useRef(null);
+    const [flyTarget, setFlyTarget] = useState(null);
+    const markerRefs = useRef({});
 
     /* ── Responsive & sidebar ── */
     const [isMobile,    setIsMobile]    = useState(window.innerWidth < 768);
@@ -458,7 +559,9 @@ const MapComponent = () => {
         if (r._stops?.length) setMapCenter([r._stops[0].lat, r._stops[0].lng]);
     };
     const handleSelectPoi = (poi) => {
-        setSelectedPoint(poi._id); setMapCenter([poi.latitud, poi.longitud]);
+        if (!hasValidCoords(poi)) return;
+        setSelectedPoint(poi._id);
+        setFlyTarget({ id: poi._id, coords: [poi.latitud, poi.longitud] });
         if (isMobile) setSidebarOpen(false);
     };
 
@@ -480,12 +583,17 @@ const MapComponent = () => {
     const [routeVisible, setRouteVisible] = useState(true);
     const activeDbRoute = selectedDbRoute && !destination ? selectedDbRoute : null;
 
+    const validPois = useMemo(() => dbPois.filter(hasValidCoords), [dbPois]);
     const allPoints = useMemo(
-        () => dbPois
-            .filter(p => p.latitud && p.longitud)
-            .map(p => [p.latitud, p.longitud]),
-        [dbPois]
+        () => validPois.map(p => [p.latitud, p.longitud]),
+        [validPois]
     );
+
+    useEffect(() => {
+        if (!selectedPoint) return;
+        document.querySelectorAll(`[data-poi-id="${selectedPoint}"]`)
+            .forEach(el => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+    }, [selectedPoint]);
 
     const sidebarContent = (
         <div className="flex flex-col gap-3 p-3">
@@ -535,15 +643,12 @@ const MapComponent = () => {
                             <div className="flex flex-col gap-1">
                                 <p className="text-xs font-semibold text-gray-500">📍 Elegir ubicación del campus</p>
                                 <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-100" style={{ scrollbarWidth: 'thin' }}>
-                                    {dbPois.map(poi => {
+                                    {validPois.map(poi => {
                                         const cfg = CATEGORY_CONFIG[poi.categoria] || CATEGORY_CONFIG.otro;
                                         return (
                                             <div key={poi._id} onClick={() => handleAddressSelect([poi.latitud, poi.longitud], poi.nombre)}
                                                 className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-blue-50 border-b border-gray-50 last:border-0 text-sm transition">
-                                                <div className="w-5 h-5 rounded flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                                                    style={{ background: cfg.color }}>
-                                                    {cfg.label.charAt(0)}
-                                                </div>
+                                                <ShapeBadge category={poi.categoria} size={BADGE_SIZE_LIST} />
                                                 <span className="text-gray-700 truncate flex-1">{poi.nombre}</span>
                                                 <span className="text-[10px] text-gray-400 shrink-0">{cfg.label}</span>
                                             </div>
@@ -621,13 +726,13 @@ const MapComponent = () => {
                     {dbPois.map(poi => {
                         const cfg = CATEGORY_CONFIG[poi.categoria] || CATEGORY_CONFIG.otro;
                         const active = selectedPoint === poi._id;
+                        const valid = hasValidCoords(poi);
                         return (
-                            <div key={poi._id} onClick={() => handleSelectPoi(poi)}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 cursor-pointer transition-all ${active ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-gray-50 border border-transparent'}`}>
-                                <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                                    style={{ background: cfg.color }}>
-                                    {cfg.label.charAt(0)}
-                                </div>
+                            <div key={poi._id} data-poi-id={poi._id}
+                                onClick={() => valid && handleSelectPoi(poi)}
+                                title={valid ? undefined : 'Esta ubicación no tiene coordenadas válidas'}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-all ${valid ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'} ${active ? 'bg-emerald-50 border border-emerald-300 ring-1 ring-emerald-200 shadow-sm' : 'hover:bg-gray-50 border border-transparent'}`}>
+                                <ShapeBadge category={poi.categoria} size={BADGE_SIZE_DEST} />
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-800 truncate leading-tight">{poi.nombre}</p>
                                     <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${cfg.tw}`}>{cfg.label}</span>
@@ -671,6 +776,7 @@ const MapComponent = () => {
                     attribution='&copy; OpenStreetMap' maxZoom={22} maxNativeZoom={19} />
                 <MapUpdater center={mapCenter} zoom={userLocation ? 15 : 17} />
                 <FitBounds points={allPoints} />
+                <FlyToController target={flyTarget} markerRefs={markerRefs} />
                 <MapClickHandler onMapClick={handleMapClick} isSettingDestination={isSettingDestination} />
                 {/* User location */}   
                 {userLocation && (
@@ -714,8 +820,15 @@ const MapComponent = () => {
                 )}
 
                 {/* DB POIs */}
-                {dbPois.map(poi => (
-                    <Marker key={poi._id} position={[poi.latitud, poi.longitud]} icon={createPoiIcon(poi.categoria)}>
+                {validPois.map(poi => {
+                    const selected = selectedPoint === poi._id;
+                    return(
+                    <Marker key={poi._id}
+                        position={[poi.latitud, poi.longitud]}
+                        icon={createPoiIcon(poi.categoria, selected)}
+                        zIndexOffset={selected ? 1000 : 0}
+                        ref={el => { if (el) markerRefs.current[poi._id] = el; else delete markerRefs.current[poi._id]; }}
+                        eventHandlers={{ click: () => setSelectedPoint(poi._id) }}>
                         <Popup minWidth={220}>
                             <div style={{ minWidth: 200 }}>
                                 <strong style={{ fontSize: 14 }}>{poi.nombre}</strong>
@@ -724,10 +837,13 @@ const MapComponent = () => {
                                 )}
                                 <span style={{
                                     fontSize: 10, fontWeight: 700,
-                                    background: (CATEGORY_CONFIG[poi.categoria]?.color || '#9ca3af') + '25',
-                                    color: CATEGORY_CONFIG[poi.categoria]?.color || '#9ca3af',
-                                    padding: '2px 8px', borderRadius: 6, display: 'inline-block',
-                                }}>{CATEGORY_CONFIG[poi.categoria]?.label || 'Otro'}</span>
+                                    background: CATEGORY_CONFIG[poi.categoria]?.color || '#E5E7EB',
+                                    color: CATEGORY_CONFIG[poi.categoria]?.dark || '#4B5563',
+                                    padding: '2px 8px', borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 4,
+                                }}>
+                                    <CatIcon category={poi.categoria} size={11} color={CATEGORY_CONFIG[poi.categoria]?.dark || '#4B5563'} />
+                                    {CATEGORY_CONFIG[poi.categoria]?.label || 'Otro'}
+                                </span>
 
                                 {poi.imagen && (
                                     <div style={{ marginTop: 10 }}>
@@ -757,7 +873,8 @@ const MapComponent = () => {
                             </div>
                         </Popup>
                     </Marker>
-                ))}
+                )
+                })}
             </MapContainer>
         </div>
     );
