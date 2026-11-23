@@ -7,11 +7,12 @@ import { profileService } from '../../services/profileServices'
 const usePasswordForm = () => {
     const { user } = storeProfile()
     const { token, clearToken } = storeAuth()
-    const { register, handleSubmit, formState: { errors } } = useForm()
+    const { register, handleSubmit, getValues, formState: { errors } } = useForm()
 
     const onSubmit = async (dataForm) => {
         try {
-            await profileService.updatePassword(user._id, dataForm, token)
+            const { confirmpassword, ...payload } = dataForm
+            await profileService.updatePassword(user._id, payload)
             toast.success('Contraseña actualizada. Inicia sesión de nuevo.')
             clearToken()
         } catch (error) {
@@ -19,7 +20,7 @@ const usePasswordForm = () => {
         }
     }
 
-    return { register, handleSubmit: handleSubmit(onSubmit), errors }
+    return { register, handleSubmit: handleSubmit(onSubmit), errors, getValues }
 }
 
 export default usePasswordForm

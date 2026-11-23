@@ -34,6 +34,10 @@ import MapCreate from './components/map/Mapcreate'
 import storeProfile from './context/storeProfile'
 import storeAuth from './context/storeAuth'
 
+const only = (roles, el) => (
+  <ProtectedRoute allowedRoles={roles}>{el}</ProtectedRoute>
+)
+
 function App() {
   const { profile } = storeProfile()
   const { token } = storeAuth()
@@ -42,7 +46,7 @@ function App() {
     if(token){
       profile()
     }
-  }, [token])
+  }, [token, profile])
 
   return (  
     <BrowserRouter>
@@ -65,20 +69,20 @@ function App() {
           <Route index element={<DashboardHome/>}/>
           <Route path='profile' element={<Profile/>}/>
           <Route path='event' element={<Event/>}/>
-          <Route path='tutoring' element={<Tutoring/>}/>
-          <Route path='tutoria' element={<Tutoria/>}/>
-          <Route path='actualizarevento/:id' element={<EventoCardUpdate />}/>
-          <Route path='actualizartutoria/:id' element={<TutoriaCardUpdate />}/>
-          <Route path='mapcreate' element={<MapCreate/>}/>
-          <Route path='list' element={<List/>}/>
-          <Route path='list/ubicaciones' element={<UbicacionesList/>}/>
-          <Route path='list/eventos' element={<EventoList />}/>
-          <Route path='list/docentes' element={<DocenteList/>}/>
-          <Route path='list/estudiantes' element={<EstudianteList/>}/>
-          <Route path='list/tutorias' element={<TutoriaList />}/>
-          <Route path='list/rutas' element={<RutasList/>}/>
-          
-          
+
+          <Route path='tutoring' element={only(['docente'], <Tutoring/>)} />
+          <Route path='tutoria' element={only(['user'], <Tutoria/>)}/>
+          <Route path='actualizarevento/:id' element={only(['admin','docente'], <EventoCardUpdate/>)}/>
+          <Route path='actualizartutoria/:id' element={only(['docente'], <TutoriaCardUpdate/>)}/>
+          <Route path='mapcreate' element={only(['admin'], <MapCreate/>)}/>
+
+          <Route path='list' element={only(['admin','docente'], <List/>)}/>
+          <Route path='list/ubicaciones' element={only(['admin'], <UbicacionesList/>)}/>
+          <Route path='list/eventos' element={only(['admin','docente'], <EventoList />)}/>
+          <Route path='list/docentes' element={only(['admin'], <DocenteList/>)}/>
+          <Route path='list/estudiantes' element={only(['admin'], <EstudianteList/>)}/>
+          <Route path='list/tutorias' element={only(['docente'], <TutoriaList />)}/>
+          <Route path='list/rutas' element={only(['admin'], <RutasList/>)}/>
         </Route>
       </Routes>
 

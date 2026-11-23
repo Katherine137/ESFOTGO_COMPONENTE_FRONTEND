@@ -12,7 +12,7 @@ const campoImagenPorRol = {
 }
 
 const useProfileForm = () => {
-    const { user, setUser } = storeProfile()
+    const { user, setUser, profile } = storeProfile()
     const { rol, token } = storeAuth()
     const { register, handleSubmit, reset, formState: { errors } } = useForm()
     const [previewImagen, setPreviewImagen] = useState(null)
@@ -25,10 +25,18 @@ const useProfileForm = () => {
             formData.append('telefono', dataForm.telefono)
             const campoImagen = campoImagenPorRol[rol] || 'subirImagenEstudiante'
             if (dataForm.imagen?.[0]) formData.append(campoImagen, dataForm.imagen[0])
+
             const updated = await profileService.update(user._id || user.id, rol, formData, token)
-            setUser(updated)
+            setUser(updated)          // actualización inmediata (texto)
+            await profile()           // datos reales del servidor (incluye la nueva foto)
+
             toast.success('¡Perfil actualizado con éxito!')
         } catch (error) {
+            if (error.response?.status === 401) {
+                toast.error('Tu sesión expiró. Inicia sesión nuevamente.')
+                storeAuth.getState().logout()
+                return
+            }
             toast.error(error.response?.data?.msg || 'Error al actualizar perfil')
         }
     }
@@ -37,7 +45,12 @@ const useProfileForm = () => {
 
     const handleImagenChange = (e) => {
         const file = e.target.files?.[0]
-        if (file) setPreviewImagen(URL.createObjectURL(file))
+        if (file) {
+            setPreviewImagen((prev) => {
+                if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev)
+                return URL.createObjectURL(file)
+            })
+        }
     }
 
     useEffect(() => {

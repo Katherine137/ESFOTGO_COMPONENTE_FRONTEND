@@ -1,42 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/src/assets/Logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ESFOTgo</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    <script>
-      let viewer360 = null;
-      function abrir360(imagenPano, nombreNodo) {
-          const overlay = document.getElementById('viewer360-overlay');
-          overlay.style.display = 'flex';
-          document.getElementById('v360-title').textContent = '360° — ' + nombreNodo;
-          if (viewer360) { viewer360.destroy(); }
-          viewer360 = pannellum.viewer('v360-container', {
-              type: 'equirectangular',
-              panorama: imagenPano,
-              autoLoad: true,
-              showControls: true,
-              compass: true
-          });
-      }
-      function cerrar360() {
-          document.getElementById('viewer360-overlay').style.display = 'none';
-          if (viewer360) { viewer360.destroy(); viewer360 = null; }
-      }
-    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <div id="viewer360-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;flex-direction:column;">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;">
-        <span id="v360-title" style="color:#fff;font-weight:600;font-size:15px"></span>
-        <button onclick="cerrar360()" style="background:#e94560;color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer">✕ Cerrar</button>
-      </div>
-      <div id="v360-container" style="flex:1;width:100%"></div>
-    </div>
   </body>
 </html>

@@ -1,25 +1,14 @@
-import axios from 'axios'
+import { api } from './api'
 
-const baseURL = import.meta.env.VITE_BACKEND_URL
-const authHeaders = (token) => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` })
+const toArray = (data) => {
+    if (Array.isArray(data)) return data
+    return data?.data ?? data?.ubicaciones ?? data?.aulas ?? []
+}
 
 export const ubicacionesService = {
-    list: async (token) => {
-        const { data } = await axios.get(`${baseURL}/mapa/ubicaciones`, { headers: authHeaders(token) })
-        if (Array.isArray(data)) return data
-        if (Array.isArray(data?.data)) return data.data
-        if (Array.isArray(data?.ubicaciones)) return data.ubicaciones
-        if (Array.isArray(data?.aulas)) return data.aulas
-        return []
-    },
-    listByCategory: async (category, token) => {
-        const { data } = await axios.get(`${baseURL}/mapa/categoria/${category}`, { headers: authHeaders(token) })
-        if (Array.isArray(data)) return data
-        if (Array.isArray(data?.data)) return data.data
-        if (Array.isArray(data?.ubicaciones)) return data.ubicaciones
-        if (Array.isArray(data?.aulas)) return data.aulas
-        return []
-    },
+    list: async () => toArray((await api.get('/mapa/ubicaciones')).data),
+    listByCategory: async (category) =>
+        toArray((await api.get(`/mapa/categoria/${encodeURIComponent(category)}`)).data)
 }
 
 export const extractUbicacionError = (error, fallback = 'Error al conectar con el servidor') =>

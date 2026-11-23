@@ -10,14 +10,14 @@ const useRegister = () => {
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm()
 
     const rolValue   = watch('rol')
-    const emailValue = watch('email')
+    const email = emailValue?.trim().toLowerCase()
 
     useEffect(() => {
         const buscarPerfil = async () => {
-            if (!emailValue || !/^[a-z._%+-]+@epn\.edu\.ec$/.test(emailValue)) return
+            if (!email || !EMAIL_RULE.value.test(email)) return
             if (!['docente', 'user'].includes(rolValue)) return
             try {
-                const userData = await authService.buscarPerfil(rolValue, emailValue)
+                const userData = await authService.buscarPerfil(rolValue, email)
                 if (userData?.data) {
                     setValue('nombre',   userData.data.nombre,   { shouldValidate: true, shouldDirty: true })
                     setValue('apellido', userData.data.apellido, { shouldValidate: true, shouldDirty: true })
@@ -32,7 +32,8 @@ const useRegister = () => {
 
     const onSubmit = async (dataForm) => {
         try {
-            await authService.register(dataForm.rol, dataForm)
+            const payload = { ...dataForm, email: dataForm.email.trim().toLowerCase() }
+            await authService.register(payload.rol, payload)
             toast.success('Registro exitoso')
             navigate('/Login')
         } catch (error) {

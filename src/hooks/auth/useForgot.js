@@ -11,7 +11,7 @@ const useForgot = () => {
         setLoading(true)
         try {
             const response = await authService.recuperarPassword(dataForm.email)
-            toast.success(response?.msg || 'Correo enviado, revisa tu bandeja de entrada')
+            toast.success('Si el correo existe, recibirás un enlace de recuperación')
             reset()
         } catch (error) {
             console.error('Error completo:', error.response?.data || error.message)

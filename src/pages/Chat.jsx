@@ -4,8 +4,8 @@ import { toast, ToastContainer } from "react-toastify"
 import storeAuth from "../context/storeAuth"
 import storeProfile from "../context/storeProfile"
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api"
-const SOCKET_URL = BASE_URL.replace('/api', '')
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api'
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || BASE_URL.replace(/\/api\/?$/, '')
 
 const Chat = () => {
     const { token, userId, rol } = storeAuth()
@@ -58,60 +58,65 @@ const Chat = () => {
         }
     }, [token])
 
+    const socketRef = useRef(null)
+    const userRef = useRef(user)
+    const userIdRef = useRef(userId)
+    const fetchConversationsRef = useRef(fetchConversations)
+
+    useEffect(() => {
+        userRef.current = user
+        userIdRef.current = userId
+        fetchConversationsRef.current = fetchConversations
+        activeConversationRef.current = activeConversation
+    }, [user, userId, fetchConversations, activeConversation])
+
     useEffect(() => {
         if (!token) return
 
-        const newSocket = io(SOCKET_URL, {
-            autoConnect: true,
-            transports: ['websocket', 'polling'],
+        const s = io(SOCKET_URL, {
+            auth: { token },
             reconnectionAttempts: 3,
             timeout: 5000
         })
-        setSocket(newSocket)
+        socketRef.current = s
+        setSocket(s)
 
-        newSocket.on("connect", () => {
-            setConnected(true)
-            const userData = user || {}
-            newSocket.emit('usuario-conectado', {
-                _id: userId,
-                nombre: userData.nombre || 'Usuario',
-                email: userData.email || '',
-                rol: rol || 'invitado'
-            })
-        })
+        s.on('connect', () => setConnected(true))
+        s.on('disconnect', () => setConnected(false))
+        s.on('connect_error', (err) => console.warn('Socket:', err.message))
 
-        newSocket.on("disconnect", () => setConnected(false))
-
-        // Chat privado (BUG FIX: mensaje-privado → mensaje-privado-recibido)
-        newSocket.on("mensaje-privado-recibido", (payload) => {
-            if (activeConversationRef.current && payload.conversationId === activeConversationRef.current._id) {
-                setMessages(prev => [...prev, { ...payload, isOwn: payload.senderId === userId }])
+        s.on('mensaje-privado-recibido', (payload) => {
+            const activa = activeConversationRef.current
+            if (activa && payload.conversationId === activa._id) {
+                setMessages(prev => [
+                    ...prev,
+                    { ...payload, isOwn: payload.senderId === userIdRef.current }
+                ])
             }
-            fetchConversations()
+            fetchConversationsRef.current()
         })
 
-        // Chat general
-        newSocket.on("mensaje-recibido", (msg) => {
-            setGeneralMessages(prev => [...prev, msg])
-        })
-
-        newSocket.on("usuarios-online", (lista) => {
-            setOnlineUsers(Array.isArray(lista) ? lista : [])
-        })
+        s.on('mensaje-recibido', (msg) => setGeneralMessages(prev => [...prev, msg]))
+        s.on('usuarios-online', (lista) => setOnlineUsers(Array.isArray(lista) ? lista : []))
 
         return () => {
-            newSocket.off("connect")
-            newSocket.off("disconnect")
-            newSocket.off("mensaje-privado-recibido")
-            newSocket.off("mensaje-recibido")
-            newSocket.off("usuarios-online")
-            newSocket.disconnect()
+            s.removeAllListeners()
+            s.disconnect()
+            socketRef.current = null
+            setSocket(null)
+            setConnected(false)
         }
-    }, [token, userId, rol, user, fetchConversations])
+    }, [token])
 
     useEffect(() => {
-        activeConversationRef.current = activeConversation
-    }, [activeConversation])
+        if (!connected || !user || !socketRef.current) return
+        socketRef.current.emit('usuario-conectado', {
+            _id: userId,
+            nombre: user.nombre || 'Usuario',
+            email: user.email || '',
+            rol: rol || 'invitado'
+        })
+    }, [connected, user, userId, rol])
 
     const fetchMessages = async (conversationId) => {
         setLoadingMsgs(true)

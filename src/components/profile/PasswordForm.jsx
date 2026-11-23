@@ -1,7 +1,8 @@
 import usePasswordForm from '../../hooks/profile/usePasswordForm'
+import { PASSWORD_RULE } from '../../utils/validators'
 
 const PasswordForm = () => {
-    const { register, handleSubmit, errors } = usePasswordForm()
+    const { register, handleSubmit, errors, getValues } = usePasswordForm()
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -17,8 +18,19 @@ const PasswordForm = () => {
                 <label className="mb-1 block text-base font-semibold text-slate-700">Nueva contraseña</label>
                 <input type="password" placeholder="Ingresa tu nueva contraseña"
                     className="block w-full rounded-xl border border-sky-950 bg-slate-50 py-2.5 px-4 text-neutral-950 outline-none focus:border-blue-950 focus:bg-white transition-all"
-                    {...register('passwordnuevo', { required: 'La contraseña nueva es obligatoria' })} />
+                    {...register('passwordnuevo', { required: 'La contraseña nueva es obligatoria', pattern: PASSWORD_RULE })} />
                 {errors.passwordnuevo && <p className="text-red-600 text-xs mt-1 font-medium">{errors.passwordnuevo.message}</p>}
+            </div>
+
+            <div>
+                <label className="mb-1 block text-base font-semibold text-slate-700">Confirmar nueva contraseña</label>
+                <input type="password" placeholder="Repite tu nueva contraseña"
+                    className="block w-full rounded-xl border border-sky-950 bg-slate-50 py-2.5 px-4 text-neutral-950 outline-none focus:border-blue-950 focus:bg-white transition-all"
+                    {...register('confirmpassword', {
+                        required: 'Confirma la nueva contraseña',
+                        validate: (v) => v === getValues('passwordnuevo') || 'Las contraseñas no coinciden'
+                    })} />
+                {errors.confirmpassword && <p className="text-red-600 text-xs mt-1 font-medium">{errors.confirmpassword.message}</p>}
             </div>
 
             <div className="pt-2">

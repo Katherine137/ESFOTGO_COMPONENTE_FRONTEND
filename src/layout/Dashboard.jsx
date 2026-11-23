@@ -32,7 +32,6 @@ const Dashboard = () => {
             console.error("Error: 'logout' no es una función. Revisa tu Context.")
         }
     }
-    console.log('user actual:', user)
     return (
         <div className="min-h-screen flex flex-col">
             <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50 h-16 flex justify-between items-center px-4 md:px-6">

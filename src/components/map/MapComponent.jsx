@@ -6,6 +6,8 @@ import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import L from 'leaflet';
 import axios from 'axios';
 import storeAuth from '../../context/storeAuth';
+import 'pannellum/build/pannellum.css'
+import 'pannellum/build/pannellum.js'
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -366,41 +368,30 @@ function Viewer360({ imageUrl, onClose }) {
     }, []);
 
     useEffect(() => {
-        if (!imageUrl || !containerRef.current) return;
-        const loadPannellum = () => new Promise((resolve) => {
-            if (window.pannellum) { resolve(); return; }
-            if (!document.getElementById('pannellum-css')) {
-                const link = document.createElement('link');
-                link.id = 'pannellum-css'; link.rel = 'stylesheet';
-                link.href = 'https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css';
-                document.head.appendChild(link);
-            }
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js';
-            script.onload = resolve;
-            document.head.appendChild(script);
-        });
-        loadPannellum().then(() => {
-            if (viewerRef.current) { try { viewerRef.current.destroy(); } catch {} }
-            viewerRef.current = window.pannellum.viewer(containerRef.current, {
-                type: 'equirectangular',
-                panorama: imageUrl,
-                autoLoad: true,
-                showControls: true,
-                compass: false,
-                friction: 0.15,
-                mouseZoom: true,
-                hfov: 85,
-                yaw: 0,
-                pitch: -10,
-                minHfov: 70,
-                maxHfov: 140,
-                crossOrigin: 'anonymous',
-            });
-            viewerRef.current.on('load', () => applyFilter(brightness, contrast, saturation));
-        });
-        return () => { if (viewerRef.current) { try { viewerRef.current.destroy(); } catch {} viewerRef.current = null; } };
-    }, [imageUrl]);
+        if (!imageUrl || !containerRef.current) return
+
+        viewerRef.current = window.pannellum.viewer(containerRef.current, {
+            type: 'equirectangular',
+            panorama: imageUrl,
+            autoLoad: true,
+            showControls: true,
+            compass: false,
+            friction: 0.15,
+            mouseZoom: true,
+            hfov: 85,
+            yaw: 0,
+            pitch: -10,
+            minHfov: 70,
+            maxHfov: 140,
+            crossOrigin: 'anonymous',
+        })
+        viewerRef.current.on('load', () => applyFilter(brightness, contrast, saturation))
+
+        return () => {
+            try { viewerRef.current?.destroy() } catch { /* ya destruido */ }
+            viewerRef.current = null
+        }
+    }, [imageUrl])
 
     useEffect(() => { applyFilter(brightness, contrast, saturation); }, [brightness, contrast, saturation, applyFilter]);
 

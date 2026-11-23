@@ -1,3 +1,4 @@
+import { PASSWORD_RULE } from '../utils/validators'
 import { ToastContainer } from 'react-toastify'
 import useReset from '../hooks/auth/useReset'
 
@@ -27,7 +28,7 @@ const Reset = () => {
                                 type="password"
                                 placeholder="Ingresa tu nueva contraseña"
                                 className="block w-full rounded-md border border-blue-500 py-1 px-1.5 text-neutral-950"
-                                {...register("password", { required: "La contraseña es obligatoria" })}
+                                {...register("password", { required: "La contraseña es obligatoria", pattern: PASSWORD_RULE })}
                             />
                             {errors.password && (
                                 <p className="text-red-900 text-xs mt-1">{errors.password.message}</p>
@@ -40,7 +41,7 @@ const Reset = () => {
                                 type="password"
                                 placeholder="Ingresa de nuevo tu contraseña"
                                 className="block w-full rounded-md border border-blue-500 py-1 px-1.5 text-neutral-950"
-                                {...register("confirmpassword", { required: "La contraseña es obligatoria" })}
+                                {...register("confirmpassword", { required: "La contraseña es obligatoria", pattern: PASSWORD_RULE })}
                             />
                             {errors.confirmpassword && (
                                 <p className="text-red-900 text-xs mt-1">{errors.confirmpassword.message}</p>

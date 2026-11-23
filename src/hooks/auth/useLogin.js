@@ -16,7 +16,8 @@ const useLogin = () => {
 
     const onSubmit = async (dataForm) => {
         try {
-            const response = await authService.login(selectedRol, dataForm)
+            const credentials = { ...dataForm, email: dataForm.email.trim().toLowerCase() }
+            const response = await authService.login(selectedRol, credentials)
             const token  = response?.token  || response?.data?.token
             const userId = response?.id || response?._id || response?.data?.id || response?.data?._id
             if (token) {
@@ -26,7 +27,7 @@ const useLogin = () => {
                 profile()
             }
         } catch (error) {
-            toast.error(error.response?.data?.msg || 'Credenciales incorrectas')
+            toast.error('Credenciales incorrectas')
         }
     }
 
