@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { MapContainer, TileLayer, Popup, CircleMarker, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Popup, CircleMarker, Polyline, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet-routing-machine';
-import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import L from 'leaflet';
 import axios from 'axios';
 import storeAuth from '../../context/storeAuth';
@@ -200,47 +198,70 @@ function MapClickHandler({ onMapClick, isSettingDestination }) {
     return null;
 }
 
+async function fetchOsrm(points, signal) {
+    const coords = points.map(p => `${p[1]},${p[0]}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+    const res = await fetch(url, { signal });
+    if (!res.ok) throw new Error(`OSRM ${res.status}`);
+    const json = await res.json();
+    const route = json.routes?.[0];
+    if (!route) throw new Error('Sin ruta');
+    return {
+        line: route.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+        distance: route.distance,
+        duration: route.duration,
+    };
+}
+
 function UserToDestinationRoute({ origin, destination, onRouteFound }) {
-    const map = useMap();
-    const controlRef = useRef(null);
+    const [line, setLine] = useState([]);
+    const [oLat, oLng] = origin || [];
+    const [dLat, dLng] = destination || [];
+
     useEffect(() => {
-        if (!origin || !destination) return;
-        if (controlRef.current) { map.removeControl(controlRef.current); controlRef.current = null; }
-        const ctrl = L.Routing.control({
-            waypoints: [L.latLng(origin[0], origin[1]), L.latLng(destination[0], destination[1])],
-            routeWhileDragging: false, addWaypoints: false, draggableWaypoints: false,
-            createMarker: () => null, show: false,
-            lineOptions: { styles: [{ color: '#2563eb', weight: 5, opacity: 0.85 }] },
-            router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1', language: 'es' }),
-        }).addTo(map);
-        ctrl.on('routesfound', (e) => {
-            const s = e.routes[0].summary;
-            onRouteFound({ distanceKm: (s.totalDistance / 1000).toFixed(2), durationMin: Math.ceil(s.totalTime / 60) });
-        });
-        ctrl.on('routingerror', () => onRouteFound(null));
-        controlRef.current = ctrl;
-        return () => { if (controlRef.current) { map.removeControl(controlRef.current); controlRef.current = null; } };
-    }, [map, origin, destination, onRouteFound]);
-    return null;
+        if (oLat == null || dLat == null) { setLine([]); return; }
+        const ctrl = new AbortController();
+        fetchOsrm([[oLat, oLng], [dLat, dLng]], ctrl.signal)
+            .then(r => {
+                setLine(r.line);
+                onRouteFound({
+                    distanceKm: (r.distance / 1000).toFixed(2),
+                    durationMin: Math.ceil(r.duration / 60),
+                });
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') return;
+                setLine([]);
+                onRouteFound(null);
+            });
+        return () => ctrl.abort();
+    }, [oLat, oLng, dLat, dLng, onRouteFound]);
+
+    return line.length > 1
+        ? <Polyline positions={line} pathOptions={{ color: '#2563eb', weight: 5, opacity: 0.85 }} />
+        : null;
 }
 
 function RoutingMachine({ waypoints, color }) {
-    const map = useMap();
-    const controlRef = useRef(null);
+    const [line, setLine] = useState([]);
+    // Clave estable: el efecto solo se repite si las coordenadas realmente cambian
+    const key = waypoints.map(p => p.join(',')).join('|');
+
     useEffect(() => {
-        if (!map || !waypoints || waypoints.length < 2) return;
-        if (controlRef.current) { map.removeControl(controlRef.current); controlRef.current = null; }
-        const ctrl = L.Routing.control({
-            waypoints: waypoints.map(p => L.latLng(p[0], p[1])),
-            routeWhileDragging: false, addWaypoints: false, draggableWaypoints: false,
-            createMarker: () => null, show: false,
-            lineOptions: { styles: [{ color: color || '#3b82f6', weight: 4, opacity: 0.75 }] },
-            router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1', language: 'es' }),
-        }).addTo(map);
-        controlRef.current = ctrl;
-        return () => { if (controlRef.current) { map.removeControl(controlRef.current); controlRef.current = null; } };
-    }, [map, waypoints, color]);
-    return null;
+        if (waypoints.length < 2) { setLine([]); return; }
+        const ctrl = new AbortController();
+        fetchOsrm(waypoints, ctrl.signal)
+            .then(r => setLine(r.line))
+            .catch(err => {
+                if (err.name !== 'AbortError') setLine(waypoints); // respaldo: línea recta
+            });
+        return () => ctrl.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [key]);
+
+    return line.length > 1
+        ? <Polyline positions={line} pathOptions={{ color: color || '#3b82f6', weight: 4, opacity: 0.75 }} />
+        : null;
 }
 
 async function geocodeAddress(query) {

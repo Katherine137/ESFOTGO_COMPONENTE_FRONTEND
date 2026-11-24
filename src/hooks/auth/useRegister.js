@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { authService } from '../../services/authService'
+import { EMAIL_RULE } from '../../utils/validators'
 
 const useRegister = () => {
     const navigate = useNavigate()
@@ -10,12 +11,14 @@ const useRegister = () => {
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm()
 
     const rolValue   = watch('rol')
-    const email = emailValue?.trim().toLowerCase()
+    const emailValue = watch('email')
 
     useEffect(() => {
+        const email = emailValue?.trim().toLowerCase()
+        if (!email || !EMAIL_RULE.value.test(email)) return
+        if (!['docente', 'user'].includes(rolValue)) return
+
         const buscarPerfil = async () => {
-            if (!email || !EMAIL_RULE.value.test(email)) return
-            if (!['docente', 'user'].includes(rolValue)) return
             try {
                 const userData = await authService.buscarPerfil(rolValue, email)
                 if (userData?.data) {
@@ -23,7 +26,7 @@ const useRegister = () => {
                     setValue('apellido', userData.data.apellido, { shouldValidate: true, shouldDirty: true })
                 }
             } catch {
-                // usuario no encontrado — no hacer nada
+                // usuario no encontrado: no hacer nada
             }
         }
         const delay = setTimeout(buscarPerfil, 800)
@@ -35,7 +38,7 @@ const useRegister = () => {
             const payload = { ...dataForm, email: dataForm.email.trim().toLowerCase() }
             await authService.register(payload.rol, payload)
             toast.success('Registro exitoso')
-            navigate('/Login')
+            navigate('/login')
         } catch (error) {
             toast.error(error.response?.data?.msg || 'Error al registrarse')
         }

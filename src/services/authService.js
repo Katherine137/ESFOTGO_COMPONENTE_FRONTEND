@@ -1,8 +1,9 @@
 import { api } from './api'
+
 const enc = encodeURIComponent
 
 const loginPath    = { admin: '/admin/login', docente: '/docente/login', user: '/estudiantes/login' }
-const registerPath = { docente: '/docente/registro', user: '/estudiantes/registro' } // sin admin
+const registerPath = { docente: '/docente/registro', user: '/estudiantes/registro' }
 const buscarPath   = { docente: '/buscarDocente', user: '/buscarEstudiante' }
 
 export const authService = {
@@ -27,5 +28,5 @@ export const authService = {
         (await api.get(`/recuperarpassword/${enc(token)}`)).data,
 
     nuevoPassword: async (token, payload) =>
-        (await api.post(`/nuevopassword/${enc(token)}`, payload)).data,
+        (await api.post(`/nuevopassword/${enc(token)}`, payload)).data
 }

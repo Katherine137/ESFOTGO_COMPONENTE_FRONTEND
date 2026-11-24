@@ -2,8 +2,10 @@ import axios from 'axios'
 import storeAuth from '../context/storeAuth'
 import storeProfile from '../context/storeProfile'
 
-const baseURL = import.meta.env.VITE_BACKEND_URL
-if (import.meta.env.PROD && !baseURL?.startsWith('https://')) {
+const raw = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '')
+const baseURL = raw.endsWith('/api') ? raw : `${raw}/api`
+
+if (import.meta.env.PROD && !baseURL.startsWith('https://')) {
     throw new Error('VITE_BACKEND_URL debe usar HTTPS')
 }
 
